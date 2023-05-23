@@ -11,7 +11,7 @@ int main() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 
-	WINDOW *win = subwin(stdscr, 5, 60, 5, 10);
+	WINDOW *win = subwin(stdscr, 5, 60, 5, 10)
 	refresh();
 
 	while (game.getRun()) {

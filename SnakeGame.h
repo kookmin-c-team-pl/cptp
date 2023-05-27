@@ -9,7 +9,12 @@
 
 class SnakeGame {
 public:
-	SnakeGame() : run(1), menu(1), gameStart(1), headX(MAPSIZEW / 2), headY(MAPSIZEH / 2), dir(1), snake(headX, headY) {
+	SnakeGame() : run(1), menu(1), gameStart(1), headX(MAPSIZEW / 2), headY(MAPSIZEH / 2), dir(1), player(headX, headY) {
+		for (int h=0; h<MAPSIZEH; h++) {
+			for (int w=0; w<MAPSIZEW; w++) {
+				map[h][w] = ' ';
+			}
+		}
 	}
 	int getRun() const {
 		return run;
@@ -45,6 +50,8 @@ public:
 		dir = _dir;
 	}
 
+	void updateGame();
+
 	void drawMenu(WINDOW *win);
 	void drawGame(WINDOW *win);
 
@@ -55,10 +62,42 @@ private:
 	int headX;
 	int headY;
 	int dir;
-	Snake snake;
+	Snake player;
+
+	int map[MAPSIZEH][MAPSIZEW];
 
 	WINDOW *win;
 };
+
+void SnakeGame::updateGame() {
+	player.moveBody(dir); // update
+
+	for (int h=0; h < MAPSIZEH; h++) {
+		for (int w=0; w < MAPSIZEW; w++) {
+			map[h][w] = ' ';
+		}
+	}
+	std::vector<Position> body = player.getBody();
+	std::vector<Position>::iterator it;
+	for (it = body.begin(); it != body.end(); it++) {
+		int x = it->getX();
+		int y = it->getY();
+		map[y][x] = 'O';
+	}
+}
+
+void SnakeGame::drawGame(WINDOW *win) {
+	wclear(win);
+	box(win, 0, 0);
+	for (int h=1; h < MAPSIZEH; h++) {
+		for (int w=1; w < MAPSIZEW; w++) {
+			// wprintw(win, " ");
+			char c = map[h][w];
+			mvwprintw(win, h, w, &c);
+		}
+	}
+	wrefresh(win);
+}
 
 void SnakeGame::drawMenu(WINDOW *win) {
 	init_pair(2,COLOR_RED,COLOR_BLUE);
@@ -91,11 +130,6 @@ void SnakeGame::drawMenu(WINDOW *win) {
 		mvwprintw(win, maxSubY / 2, 25, "Option\r");
 		wattroff(win, A_STANDOUT);
 	}
-}
-
-void SnakeGame::drawGame(WINDOW *win) {
-	snake.moveBody(dir);
-	wbkgd(win, COLOR_RED);
 }
 
 #endif

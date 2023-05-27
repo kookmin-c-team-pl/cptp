@@ -22,9 +22,9 @@ int main() {
 			// game.drawMenu(win);
 		}
 		if (game.getGameStart()) {
+			game.updateGame();
 			game.drawGame(stdscr);
 		}
-		refresh();
 		int ch = getch();
 		switch (ch) {
 			case (KEY_UP):

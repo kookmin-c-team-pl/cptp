@@ -18,7 +18,7 @@ public:
 	void removeTail(WINDOW *win) {
 		Position tail = body.back();
 		body.pop_back();
-		mvwprintw(win, tail.getY(), tail.getX(), " ");
+		mvwprintw(win, tail.getX(), tail.getY(), " ");
 	}
 	void moveBody(int dir, int item = 0) {
 		if (dir == 1) { // up

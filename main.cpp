@@ -5,8 +5,10 @@
 int main() {
 	SnakeGame game;
 	initscr();
-	keypad(stdscr, TRUE);
+	cbreak();
+	noecho();
 	nodelay(stdscr, TRUE);
+	keypad(stdscr, TRUE);
 	start_color();
 	box(stdscr, 0, 0);
 	printw("mainWin");
@@ -14,17 +16,20 @@ int main() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 
-	// WINDOW *win = subwin(stdscr, 5, 60, 5, 10);
+	WINDOW *win = subwin(stdscr, 5, 20, 5, 10);
 	refresh();
 
 	while (game.getRun()) {
-		if (game.getMenu()) {
-			// game.drawMenu(win);
-		}
-		if (game.getGameStart()) {
+		// if (game.getMenu() > 0) {
+		// 	game.drawMenu(win);
+		// } else if (game.getGameStart())
+		{
 			game.updateGame();
 			game.drawGame(stdscr);
+			game.checkGame();
+			usleep(500000); // <-
 		}
+		// int ch = wgetch(stdscr); // same
 		int ch = getch();
 		switch (ch) {
 			case (KEY_UP):
@@ -42,7 +47,7 @@ int main() {
 			default:
 				break;
 		}
-		usleep(500000);
+		flushinp(); // clear buffer
 	}
 	
 	endwin();

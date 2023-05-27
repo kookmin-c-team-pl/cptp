@@ -5,7 +5,7 @@
 #include "Snake.h"
 
 #define MAPSIZEW 21
-#define MAPSIZEH 21
+#define MAPSIZEH 11
 
 class SnakeGame {
 public:
@@ -51,9 +51,10 @@ public:
 	}
 
 	void updateGame();
+	void drawGame(WINDOW *win);
+	void checkGame();
 
 	void drawMenu(WINDOW *win);
-	void drawGame(WINDOW *win);
 
 private:
 	int run;
@@ -64,17 +65,21 @@ private:
 	int dir;
 	Snake player;
 
-	int map[MAPSIZEH][MAPSIZEW];
+	char map[MAPSIZEH][MAPSIZEW];
 
 	WINDOW *win;
 };
 
 void SnakeGame::updateGame() {
-	player.moveBody(dir); // update
+	player.moveBody(dir, 0); // update
 
 	for (int h=0; h < MAPSIZEH; h++) {
 		for (int w=0; w < MAPSIZEW; w++) {
-			map[h][w] = ' ';
+			if (h == 0 || w == 0 || h + 1 == MAPSIZEH || w + 1 == MAPSIZEW) {
+				map[h][w] = '@';
+			} else {
+				map[h][w] = ' ';
+			}
 		}
 	}
 	std::vector<Position> body = player.getBody();
@@ -82,15 +87,29 @@ void SnakeGame::updateGame() {
 	for (it = body.begin(); it != body.end(); it++) {
 		int x = it->getX();
 		int y = it->getY();
-		map[y][x] = 'O';
+		if (map[y][x] == ' ') {
+			if (it == body.begin()) {
+				map[y][x] = 'H';
+			} else {
+				map[y][x] = 'O';
+			}
+		}
+	}
+}
+
+void SnakeGame::checkGame() {
+	Position head = player.getBody().front();
+	if (map[head.getY()][head.getX()] == '@') {
+		this->gameStart = 0;
+		this->menu = 1;
 	}
 }
 
 void SnakeGame::drawGame(WINDOW *win) {
 	wclear(win);
-	box(win, 0, 0);
-	for (int h=1; h < MAPSIZEH; h++) {
-		for (int w=1; w < MAPSIZEW; w++) {
+	// box(win, 0, 0);
+	for (int h=0; h < MAPSIZEH; h++) {
+		for (int w=0; w < MAPSIZEW; w++) {
 			// wprintw(win, " ");
 			char c = map[h][w];
 			mvwprintw(win, h, w, &c);

@@ -1,9 +1,12 @@
 
 #include "SnakeGame.h"
+#include "unistd.h"
 
 int main() {
 	SnakeGame game;
 	initscr();
+	keypad(stdscr, TRUE);
+	nodelay(stdscr, TRUE);
 	start_color();
 	box(stdscr, 0, 0);
 	printw("mainWin");
@@ -11,39 +14,35 @@ int main() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 
-	WINDOW *win = subwin(stdscr, 5, 60, 5, 10)
+	// WINDOW *win = subwin(stdscr, 5, 60, 5, 10);
 	refresh();
 
 	while (game.getRun()) {
 		if (game.getMenu()) {
-			game.drawMenu(win);
+			// game.drawMenu(win);
 		}
 		if (game.getGameStart()) {
 			game.drawGame(stdscr);
 		}
 		refresh();
-		char ch = wgetch(win);
+		int ch = getch();
 		switch (ch) {
-			case ('a'):
-				game.reduceMenu();
+			case (KEY_UP):
+				game.setDir(1);
 				break;
-			case ('d'):
-				game.increaseMenu();
+			case (KEY_RIGHT):
+				game.setDir(2);
 				break;
-			case ('q'):
-				game.setRun(0);
-			case ('z'):
-				switch (game.getMenu()) {
-					case 1:
-						game.setGameStart(1);
-						game.closeMenu();
-						werase(win);
-						// wclear(win);
-				}
+			case (KEY_DOWN):
+				game.setDir(3);
+				break;
+			case (KEY_LEFT):
+				game.setDir(4);
+				break;
 			default:
 				break;
 		}
-		// std::cout << "your input: " << ch << std::endl; //
+		usleep(500000);
 	}
 	
 	endwin();

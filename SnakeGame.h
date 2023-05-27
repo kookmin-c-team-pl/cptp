@@ -2,13 +2,15 @@
 #define SNAKEGAME_H
 #include "ncurses.h"
 #include <iostream>
+#include "Snake.h"
 
-#define MAPSIZEW 20
-#define MAPSIZEH 10
+#define MAPSIZEW 21
+#define MAPSIZEH 21
 
 class SnakeGame {
 public:
-	SnakeGame() : run(1), menu(1), gameStart(0), x(MAPSIZEW / 2), y(MAPSIZEH / 2) {}
+	SnakeGame() : run(1), menu(1), gameStart(1), headX(MAPSIZEW / 2), headY(MAPSIZEH / 2), dir(1), snake(headX, headY) {
+	}
 	int getRun() const {
 		return run;
 	}
@@ -39,6 +41,9 @@ public:
 	void setGameStart(int g) {
 		gameStart = g;
 	}
+	void setDir(int _dir) {
+		dir = _dir;
+	}
 
 	void drawMenu(WINDOW *win);
 	void drawGame(WINDOW *win);
@@ -47,8 +52,10 @@ private:
 	int run;
 	int menu;
 	int gameStart;
-	int x;
-	int y;
+	int headX;
+	int headY;
+	int dir;
+	Snake snake;
 
 	WINDOW *win;
 };
@@ -87,7 +94,7 @@ void SnakeGame::drawMenu(WINDOW *win) {
 }
 
 void SnakeGame::drawGame(WINDOW *win) {
-	mvwprintw(win, 1, 1, "Game Start!");
+	snake.moveBody(dir);
 	wbkgd(win, COLOR_RED);
 }
 

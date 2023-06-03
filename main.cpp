@@ -5,8 +5,8 @@
 int main() {
 	SnakeGame game;
 	initscr();
-	cbreak();
-	noecho();
+	// cbreak();
+	// noecho();
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
 	start_color();
@@ -16,18 +16,22 @@ int main() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 
-	WINDOW *win = subwin(stdscr, 5, 20, 5, 10);
-	refresh();
+	WINDOW *win = subwin(stdscr, 5, 50, 5, 10);
+	// refresh();
 
 	while (game.getRun()) {
-		// if (game.getMenu() > 0) {
-		// 	game.drawMenu(win);
-		// } else if (game.getGameStart())
+		if (game.getMenu() > 0) {
+			game.drawMenu(win);
+			continue;
+		} else if (game.getGameStart())
 		{
 			game.updateGame();
 			game.drawGame(stdscr);
-			game.checkGame();
+			if (game.checkGame()) {
+				wclear(stdscr);
+			}
 			usleep(500000); // <-
+			game.earnScore();
 		}
 		// int ch = wgetch(stdscr); // same
 		int ch = getch();
@@ -44,6 +48,8 @@ int main() {
 			case (KEY_LEFT):
 				game.setDir(4);
 				break;
+			case ('z'):
+				;
 			default:
 				break;
 		}

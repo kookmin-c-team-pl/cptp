@@ -2,6 +2,8 @@
 #include <vector>
 #include "unistd.h"
 
+// gpt한테 짜달라고한 코드
+
 // 게임의 상태 정의
 enum class GameState {
     MENU,

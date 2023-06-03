@@ -22,13 +22,13 @@ public:
 	}
 	void moveBody(int dir, int item = 0) {
 		if (dir == 1) { // up
-			body.insert(body.begin(), head.getUpPosition());
+			body.insert(body.begin(), Position(head.getX(), head.getY() - 1));
 		} else if (dir == 2) { // right
-			body.insert(body.begin(), head.getRightPosition());
+			body.insert(body.begin(), Position(head.getX() + 2, head.getY()));
 		} else if (dir == 3) { // down
-			body.insert(body.begin(), head.getDownPosition());
+			body.insert(body.begin(), Position(head.getX(), head.getY() + 1));
 		} else if (dir == 4) { // left
-			body.insert(body.begin(), head.getLeftPosition());
+			body.insert(body.begin(), Position(head.getX() - 2, head.getY()));
 		}
 		head = body.front();
 		switch (item)

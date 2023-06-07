@@ -174,9 +174,9 @@ void SnakeGame::checkGate() {
 			}
 		}
 		if (g_x == 0) {
-			player.headGate(g_x, g_y, 3);
-		} else if (g_y == 0) {
 			player.headGate(g_x, g_y, 2);
+		} else if (g_y == 0) {
+			player.headGate(g_x, g_y, 3);
 		} else if (g_x * 2 == MAPSIZEW) {
 			player.headGate(g_x, g_y, 4);
 		} else if (g_y - 1 == MAPSIZEH) {

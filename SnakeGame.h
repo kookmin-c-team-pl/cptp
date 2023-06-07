@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Snake.h"
 #include <time.h>
+#include <cstring>
 #include <random>
 
 #define MAPSIZEW 18 * 2

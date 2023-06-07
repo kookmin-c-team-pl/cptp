@@ -46,6 +46,25 @@ public:
 			break;
 		}
 	}
+	void headGate(int x, int y, int d) {
+		if (d == 1) {
+			body.erase(body.begin());
+			body.insert(body.begin(), Position(x, y - 1));
+			head = Position(x, y - 1);
+		} else if (d == 2) {
+			body.erase(body.begin());
+			body.insert(body.begin(), Position(x + 1, y));
+			head = Position(x + 1, y);
+		} else if (d == 3) {
+			body.erase(body.begin());
+			body.insert(body.begin(), Position(x, y + 1));
+			head = Position(x, y + 1);
+		} else if (d == 4) {
+			body.erase(body.begin());
+			body.insert(body.begin(), Position(x - 1, y));
+			head = Position(x - 1, y);
+		}
+	}
 
 private:
 	std::vector<Position> body;

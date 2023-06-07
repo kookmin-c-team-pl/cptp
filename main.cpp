@@ -25,6 +25,7 @@ int main() {
 			continue;
 		} else if (game.getGameStart())
 		{
+			game.checkGate();
 			game.updateGame();
 			game.drawGame(stdscr);
 			if (game.checkGame()) {

@@ -140,8 +140,9 @@ void SnakeGame::updateGame() {
 }
 
 void SnakeGame::checkGate() {
+	Position head = player.getBody().front();
 	int g_x=0, g_y=0;
-	if (dirGate == 1) { // A
+	if (map[head.getY()][head.getX()] == 'A') { // A
 		for (int i=0; i<MAPSIZEH; i++) {
 			for (int j=0; j<MAPSIZEW; j++) {
 				if (map[i][j] == 'B') {
@@ -163,7 +164,7 @@ void SnakeGame::checkGate() {
 			player.headGate(g_x, g_y, 1);
 			dir = 1;
 		}
-	} if (dirGate == 2) { // B
+	} else if (map[head.getY()][head.getX()] == 'B') { // B
 		for (int i=0; i<MAPSIZEH; i++) {
 			for (int j=0; j<MAPSIZEW; j++) {
 				if (map[i][j] == 'A') {
@@ -191,11 +192,6 @@ int SnakeGame::checkGame() {
 		this->menu = 1;
 		return 1;
 	}
-	if (map[head.getY()][head.getX()] == 'A') {
-		dirGate = 1;
-	} else if (map[head.getY()][head.getX()] == 'B') {
-		dirGate = 2;
-	}
 	return 0;
 }
 
@@ -210,6 +206,8 @@ void SnakeGame::drawGame(WINDOW *win) {
 		}
 	}
 	mvwprintw(win, 0, 3, std::to_string(score).c_str());
+	Position head = player.getBody().front();
+	mvwprintw(win, 0, 15, "x:%d, y:%d", head.getX(), head.getY());
 	// wrefresh(win);
 }
 

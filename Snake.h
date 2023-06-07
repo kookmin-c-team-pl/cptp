@@ -15,12 +15,8 @@ public:
 	const std::vector<Position> &getBody() {
 		return body;
 	}
-	void removeTail(WINDOW *win) {
-		Position tail = body.back();
-		body.pop_back();
-		mvwprintw(win, tail.getX(), tail.getY(), " ");
-	}
 	void moveBody(int dir, int item = 0) {
+		// head insert
 		if (dir == 1) { // up
 			body.insert(body.begin(), Position(head.getX(), head.getY() - 1));
 		} else if (dir == 2) { // right
@@ -31,6 +27,7 @@ public:
 			body.insert(body.begin(), Position(head.getX() - 2, head.getY()));
 		}
 		head = body.front();
+		// tail remove
 		switch (item)
 		{
 		case 0:
@@ -48,21 +45,21 @@ public:
 	}
 	void headGate(int x, int y, int d) {
 		if (d == 1) {
-			body.erase(body.begin());
-			body.insert(body.begin(), Position(x, y - 1));
-			head = Position(x, y - 1);
+			body.front().setX(x);
+			body.front().setY(y - 1);
+			head = body.front();
 		} else if (d == 2) {
-			body.erase(body.begin());
-			body.insert(body.begin(), Position(x + 1, y));
-			head = Position(x + 1, y);
+			body.front().setX(x + 1);
+			body.front().setY(y);
+			head = body.front();
 		} else if (d == 3) {
-			body.erase(body.begin());
-			body.insert(body.begin(), Position(x, y + 1));
-			head = Position(x, y + 1);
+			body.front().setX(x);
+			body.front().setY(y + 1);
+			head = body.front();
 		} else if (d == 4) {
-			body.erase(body.begin());
-			body.insert(body.begin(), Position(x - 1, y));
-			head = Position(x - 1, y);
+			body.front().setX(x - 1);
+			body.front().setY(y);
+			head = body.front();
 		}
 	}
 

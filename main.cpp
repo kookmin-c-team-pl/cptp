@@ -5,8 +5,8 @@
 int main() {
 	SnakeGame game;
 	initscr();
-	// cbreak();
-	// noecho();
+	cbreak();
+	noecho();
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
 	start_color();

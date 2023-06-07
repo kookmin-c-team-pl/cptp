@@ -3,6 +3,8 @@
 #include "ncurses.h"
 #include <iostream>
 #include "Snake.h"
+#include <time.h>
+#include <random>
 
 #define MAPSIZEW 18 * 2
 #define MAPSIZEH 18
@@ -60,6 +62,7 @@ public:
 
 	void getKeyInMenu();
 	void drawMenu(WINDOW *win);
+	void setGate();
 
 private:
 	int run;
@@ -70,26 +73,51 @@ private:
 	int dir;
 	int score;
 	Snake player;
+	int gates;
 
 	int map[MAPSIZEH][MAPSIZEW];
 
 	WINDOW *win;
 };
 
+void SnakeGame::setGate() {
+	srand(time(NULL));
+	while (gates < 2) {
+		for (int i=0; i<MAPSIZEH; i++) {
+			for (int j=0; j<MAPSIZEW; j++) {
+				if (map[i][j] == '?') {
+					if (rand() % 13 == 0) {
+						map[i][j] = 'G';
+						gates++;
+					}
+				}
+			}
+		}
+	}
+}
+
 void SnakeGame::updateGame() {
+	this->setGate();
+
 	player.moveBody(dir, 0); // update
 
 	for (int h=0; h < MAPSIZEH; h++) { // 사각형 틀
 		for (int w=0; w < MAPSIZEW; w++) {
 			if (h == 0 || w == 0 || h + 1 == MAPSIZEH || w + 1 == MAPSIZEW) {
-				map[h][w] = '@';
+				if (map[h][w] != 'G')
+					map[h][w] = '?';
 			} else {
 				map[h][w] = ' ';
 			}
+			map[0][0] = '@';
+			map[0][MAPSIZEW - 1] = '@';
+			map[MAPSIZEH - 1][0] = '@';
+			map[MAPSIZEH - 1][MAPSIZEW - 1] = '@';
 		}
 	}
 	for (int i=1; i<MAPSIZEH / 3; i++) { // wall
-		map[i][MAPSIZEW / 3] = '?';
+		if (map[i][MAPSIZEW / 3] != 'G')
+			map[i][MAPSIZEW / 3] = '?';
 	}
 	std::vector<Position> body = player.getBody();
 	std::vector<Position>::iterator it;

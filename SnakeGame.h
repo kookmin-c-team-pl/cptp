@@ -61,6 +61,7 @@ public:
 	void updateBody();
 	void drawGame(WINDOW *win);
 	int checkGame();
+	void midGate(int x, int y);
 	void checkGate();
 	void initGame();
 
@@ -90,7 +91,7 @@ void SnakeGame::setGate() {
 	while (gates < 2) {
 		for (int i=0; i<MAPSIZEH && gates < 2; i++) {
 			for (int j=0; j<MAPSIZEW * 2 && gates < 2; j+=2) {
-				if (map[i][j] == '?') {
+				if (map[i][j] == L'?') {
 					if (rand() % 13 == 0) {
 						map[i][j] = 'A' + gates;
 						gates++;
@@ -109,8 +110,9 @@ void SnakeGame::updateGame() {
 		for (int w=0; w < MAPSIZEW; w++) {
 			if (h == 0 || w == 0 || h + 1 == MAPSIZEH || w + 1 == MAPSIZEW) {
 				if (map[h][w] != 'A' && map[h][w] != 'B')
-					map[h][w] = '?';
+					map[h][w] = L'@';
 			} else {
+				if (map[h][w] != 'A' && map[h][w] != 'B' && map[h][w] != '?')
 				map[h][w] = ' ';
 			}
 			map[0][0] = '@';
@@ -119,12 +121,85 @@ void SnakeGame::updateGame() {
 			map[MAPSIZEH - 1][MAPSIZEW - 1] = '@';
 		}
 	}
-	// for (int i=1; i<MAPSIZEH / 3; i++) { // wall
-	// 	if (map[i][MAPSIZEW / 3] != 'G') {
-	// 		map[i][MAPSIZEW / 3] = '?';
-	// 	}
-	// }
+	for (int i=1; i<MAPSIZEH / 3; i++) { // wall
+		if (gates > 1)
+			break;
+		map[i][MAPSIZEH / 3] = '?';
+	}
+	for (int i=1; i<MAPSIZEW / 3; i++) { // wall
+		if (gates > 1)
+			break;
+		map[MAPSIZEW / 3][i] = '?';
+	}
 	this->setGate();
+}
+
+void SnakeGame::midGate(int g_x, int g_y) {
+	switch (dir)
+	{
+	case 1:
+		if (map[g_y - 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 1);
+			dir = 1;
+		} else if (map[g_y][g_x + 2] == ' ') {
+			player.headGate(g_x, g_y, 2);
+			dir = 2;
+		} else if (map[g_y + 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 3);
+			dir = 3;
+		} else if (map[g_y][g_x - 2] == ' ') {
+			player.headGate(g_x, g_y, 4);
+			dir = 4;
+		}
+		break;
+	case 2:
+		if (map[g_y][g_x + 2] == ' ') {
+			player.headGate(g_x, g_y, 2);
+			dir = 2;
+		} else if (map[g_y + 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 3);
+			dir = 3;
+		} else if (map[g_y][g_x - 2] == ' ') {
+			player.headGate(g_x, g_y, 4);
+			dir = 4;
+		} else if (map[g_y - 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 1);
+			dir = 1;
+		}
+		break;
+	case 3:
+		if (map[g_y + 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 3);
+			dir = 3;
+		} else if (map[g_y][g_x - 2] == ' ') {
+			player.headGate(g_x, g_y, 4);
+			dir = 4;
+		} else if (map[g_y - 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 1);
+			dir = 1;
+		} else if (map[g_y][g_x + 2] == ' ') {
+			player.headGate(g_x, g_y, 2);
+			dir = 2;
+		}
+		break;
+	case 4:
+		if (map[g_y][g_x - 2] == ' ') {
+			player.headGate(g_x, g_y, 4);
+			dir = 4;
+		} else if (map[g_y - 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 1);
+			dir = 1;
+		} else if (map[g_y][g_x + 2] == ' ') {
+			player.headGate(g_x, g_y, 2);
+			dir = 2;
+		} else if (map[g_y + 1][g_x] == ' ') {
+			player.headGate(g_x, g_y, 3);
+			dir = 3;
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 void SnakeGame::checkGate() {
@@ -151,6 +226,8 @@ void SnakeGame::checkGate() {
 		} else if (g_y - 1 == MAPSIZEH) {
 			player.headGate(g_x, g_y, 1);
 			dir = 1;
+		} else {
+			midGate(g_x, g_y);
 		}
 	} else if (map[head.getY()][head.getX()] == 'B') { // B
 		for (int i=0; i<MAPSIZEH; i++) { // find A
@@ -173,6 +250,8 @@ void SnakeGame::checkGate() {
 		} else if (g_y - 1 == MAPSIZEH) {
 			player.headGate(g_x, g_y, 1);
 			dir = 1;
+		} else {
+			midGate(g_x, g_y);
 		}
 	}
 }
@@ -185,7 +264,7 @@ void SnakeGame::updateBody() {
 		int y = it->getY();
 		if (map[y][x] == ' ') {
 			if (it == body.begin()) {
-				map[y][x] = 'o';
+				map[y][x] = L'O';
 			} else {
 				map[y][x] = '*';
 			}
@@ -195,9 +274,10 @@ void SnakeGame::updateBody() {
 
 int SnakeGame::checkGame() {
 	Position head = player.getBody().front();
-	if (map[head.getY()][head.getX()] == '@' || map[head.getY()][head.getX()] == '?') {
+	if (map[head.getY()][head.getX()] == '@' || map[head.getY()][head.getX()] == L'?') {
+		this->updateGame();
 		this->gameStart = 0;
-		this->menu = 1;
+		// this->menu = 1;
 		return 1;
 	}
 	return 0;
@@ -209,8 +289,8 @@ void SnakeGame::drawGame(WINDOW *win) {
 	for (int h=0; h < MAPSIZEH; h++) {
 		for (int w=0; w < MAPSIZEW; w++) {
 			// wprintw(win, " ");
-			char c = map[h][w];
-			mvwprintw(win, h + 1, w, &c);
+			int c = map[h][w];
+			mvwprintw(win, h + 1, w, "%c", c);
 		}
 	}
 	mvwprintw(win, 0, 3, std::to_string(score).c_str());
@@ -221,7 +301,7 @@ void SnakeGame::drawGame(WINDOW *win) {
 
 void SnakeGame::initGame() {
 	run = (1);
-	menu = (1);
+	menu = (0);
 	gameStart = (1);
 	headX = (MAPSIZEW / 2);
 	headY = (MAPSIZEH / 2);
@@ -252,11 +332,11 @@ void SnakeGame::getKeyInMenu() {
 				case (1):
 					this->closeMenu();
 					this->setGameStart(1);
+					initGame();
 					break;
 				case (4):
 					wclear(stdscr);
 					werase(stdscr);
-					initGame();
 					exit(0);
 					break;
 			}

@@ -5,8 +5,8 @@
 int main() {
 	SnakeGame game;
 	initscr();
-	// cbreak();
-	// noecho();
+	cbreak();
+	noecho();
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
 	start_color();
@@ -20,31 +20,30 @@ int main() {
 	// refresh();
 
 	while (game.getRun()) {
-		int ch = getch();
-		switch (ch) {
-			case (KEY_UP):
-				game.setDir(1);
-				break;
-			case (KEY_RIGHT):
-				game.setDir(2);
-				break;
-			case (KEY_DOWN):
-				game.setDir(3);
-				break;
-			case (KEY_LEFT):
-				game.setDir(4);
-				break;
-			case ('z'):
-				;
-			default:
-				break;
-		}
-		flushinp(); // clear buffer
 		if (game.getMenu() > 0) {
 			game.drawMenu(win);
 			continue;
 		} else if (game.getGameStart())
 		{
+			int ch = getch();
+			switch (ch) {
+				case (KEY_UP):
+					game.setDir(1);
+					break;
+				case (KEY_RIGHT):
+					game.setDir(2);
+					break;
+				case (KEY_DOWN):
+					game.setDir(3);
+					break;
+				case (KEY_LEFT):
+					game.setDir(4);
+					break;
+				case ('z'):
+					;
+				default:
+					break;
+			}
 			game.updateGame();
 			game.checkGate();
 			game.updateBody();
@@ -52,6 +51,7 @@ int main() {
 			if (game.checkGame()) {
 				wclear(stdscr);
 			}
+			flushinp(); // clear buffer
 			usleep(500000); // <-
 			game.earnScore();
 		}

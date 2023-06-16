@@ -25,7 +25,7 @@ int main() {
 			continue;
 		} else if (game.getGameStart())
 		{
-			int ch = getch();
+			int ch = wgetch(stdscr);
 			switch (ch) {
 				case (KEY_UP):
 					game.setDir(1);
@@ -51,7 +51,7 @@ int main() {
 			if (game.checkGame()) {
 				wclear(stdscr);
 			}
-			flushinp(); // clear buffer
+			getch(); // clear buffer
 			usleep(500000); // <-
 			game.earnScore();
 		}

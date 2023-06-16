@@ -58,9 +58,11 @@ public:
 	}
 
 	void updateGame();
+	void updateBody();
 	void drawGame(WINDOW *win);
 	int checkGame();
 	void checkGate();
+	void initGame();
 
 	void getKeyInMenu();
 	void drawMenu(WINDOW *win);
@@ -123,27 +125,13 @@ void SnakeGame::updateGame() {
 	// 	}
 	// }
 	this->setGate();
-
-	std::vector<Position> body = player.getBody();
-	std::vector<Position>::iterator it;
-	for (it = body.begin(); it != body.end(); it++) {
-		int x = it->getX();
-		int y = it->getY();
-		if (map[y][x] == ' ') {
-			if (it == body.begin()) {
-				map[y][x] = 'o';
-			} else {
-				map[y][x] = '*';
-			}
-		}
-	}
 }
 
 void SnakeGame::checkGate() {
 	Position head = player.getBody().front();
 	int g_x=0, g_y=0;
 	if (map[head.getY()][head.getX()] == 'A') { // A
-		for (int i=0; i<MAPSIZEH; i++) {
+		for (int i=0; i<MAPSIZEH; i++) { // find B
 			for (int j=0; j<MAPSIZEW; j++) {
 				if (map[i][j] == 'B') {
 					g_y = i;
@@ -165,7 +153,7 @@ void SnakeGame::checkGate() {
 			dir = 1;
 		}
 	} else if (map[head.getY()][head.getX()] == 'B') { // B
-		for (int i=0; i<MAPSIZEH; i++) {
+		for (int i=0; i<MAPSIZEH; i++) { // find A
 			for (int j=0; j<MAPSIZEW; j++) {
 				if (map[i][j] == 'A') {
 					g_y = i;
@@ -175,12 +163,32 @@ void SnakeGame::checkGate() {
 		}
 		if (g_x == 0) {
 			player.headGate(g_x, g_y, 2);
+			dir = 2;
 		} else if (g_y == 0) {
 			player.headGate(g_x, g_y, 3);
+			dir = 3;
 		} else if (g_x * 2 == MAPSIZEW) {
 			player.headGate(g_x, g_y, 4);
+			dir = 4;
 		} else if (g_y - 1 == MAPSIZEH) {
 			player.headGate(g_x, g_y, 1);
+			dir = 1;
+		}
+	}
+}
+
+void SnakeGame::updateBody() {
+	std::vector<Position> body = player.getBody(); // update body
+	std::vector<Position>::iterator it;
+	for (it = body.begin(); it != body.end(); it++) {
+		int x = it->getX();
+		int y = it->getY();
+		if (map[y][x] == ' ') {
+			if (it == body.begin()) {
+				map[y][x] = 'o';
+			} else {
+				map[y][x] = '*';
+			}
 		}
 	}
 }
@@ -211,6 +219,19 @@ void SnakeGame::drawGame(WINDOW *win) {
 	// wrefresh(win);
 }
 
+void SnakeGame::initGame() {
+	run = (1);
+	menu = (1);
+	gameStart = (1);
+	headX = (MAPSIZEW / 2);
+	headY = (MAPSIZEH / 2);
+	dir = (1);
+	dirGate = (0);
+	score = (0);
+	player = Snake(headX, headY);
+	gates = (0);
+}
+
 void SnakeGame::getKeyInMenu() {
 	int ch = getch();
 	switch (ch) {
@@ -235,6 +256,7 @@ void SnakeGame::getKeyInMenu() {
 				case (4):
 					wclear(stdscr);
 					werase(stdscr);
+					initGame();
 					exit(0);
 					break;
 			}

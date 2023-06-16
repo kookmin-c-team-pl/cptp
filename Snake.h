@@ -9,8 +9,8 @@ class Snake {
 public:
 	Snake(int x, int y): head(Position(x, y)) {
 		body.push_back(Position(x, y));
-		body.push_back(Position(x - 1, y));
 		body.push_back(Position(x - 2, y));
+		body.push_back(Position(x - 4, y));
 	}
 	const std::vector<Position> &getBody() {
 		return body;
@@ -49,7 +49,7 @@ public:
 			body.front().setY(y - 1);
 			head = body.front();
 		} else if (d == 2) {
-			body.front().setX(x + 1);
+			body.front().setX(x + 2);
 			body.front().setY(y);
 			head = body.front();
 		} else if (d == 3) {
@@ -57,7 +57,7 @@ public:
 			body.front().setY(y + 1);
 			head = body.front();
 		} else if (d == 4) {
-			body.front().setX(x - 1);
+			body.front().setX(x - 2);
 			body.front().setY(y);
 			head = body.front();
 		}

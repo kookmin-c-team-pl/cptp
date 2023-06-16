@@ -31,13 +31,13 @@ public:
 	}
 	void reduceMenu() {
 		if (menu > 1)
-			menu--;
+			menu = 1;
 		else if (menu == 0)
 			menu = 1;
 	}
 	void increaseMenu() {
 		if (menu < 4)
-			menu++;
+			menu = 4;
 		else if (menu == 0)
 			menu = 1;
 	}
@@ -69,6 +69,8 @@ public:
 	void drawMenu(WINDOW *win);
 	void setGate();
 
+	WINDOW *win;
+
 private:
 	int run;
 	int menu;
@@ -82,24 +84,40 @@ private:
 	int gates;
 
 	int map[MAPSIZEH][MAPSIZEW];
-
-	WINDOW *win;
 };
 
 void SnakeGame::setGate() {
-	srand(time(NULL));
-	while (gates < 2) {
-		for (int i=0; i<MAPSIZEH && gates < 2; i++) {
-			for (int j=0; j<MAPSIZEW * 2 && gates < 2; j+=2) {
-				if (map[i][j] == L'?') {
-					if (rand() % 13 == 0) {
-						map[i][j] = 'A' + gates;
-						gates++;
-					}
-				}
-			}
-		}
-	}
+	static time_t lastGateTime = time(nullptr);
+    time_t currentTime = time(nullptr);
+
+    if (currentTime - lastGateTime >= 5) {
+        srand(static_cast<unsigned>(time(nullptr)));
+
+        gates = 0; // 게이트 생성 전에 gates 변수를 초기화합니다.
+
+        // 게이트 삭제 로직 추가
+        for (int i = 0; i < MAPSIZEH; i++) {
+            for (int j = 0; j < MAPSIZEW * 2; j++) {
+                if (map[i][j] >= 'A' && map[i][j] <= 'Z') {
+                    map[i][j] = '?';
+                }
+            }
+        }
+
+        while (gates < 2) {
+            for (int i = 0; i < MAPSIZEH && gates < 2; i++) {
+                for (int j = 0; j < MAPSIZEW * 2 && gates < 2; j += 2) {
+                    if (map[i][j] == '?') {
+                        if (rand() % 13 == 0) {
+                            map[i][j] = 'A' + gates;
+                            gates++;
+                        }
+                    }
+                }
+            }
+        }
+        lastGateTime = currentTime;
+    }
 }
 
 void SnakeGame::updateGame() {
@@ -121,15 +139,15 @@ void SnakeGame::updateGame() {
 			map[MAPSIZEH - 1][MAPSIZEW - 1] = '@';
 		}
 	}
-	for (int i=1; i<MAPSIZEH / 3; i++) { // wall
-		if (gates > 1)
-			break;
-		map[i][MAPSIZEH / 3] = '?';
-	}
 	for (int i=1; i<MAPSIZEW / 3; i++) { // wall
 		if (gates > 1)
 			break;
-		map[MAPSIZEW / 3][i] = '?';
+		map[i][MAPSIZEW / 3] = '?';
+	}
+	for (int i=1; i<MAPSIZEH / 3; i++) { // wall
+		if (gates > 1)
+			break;
+		map[MAPSIZEH / 3][i] = '?';
 	}
 	this->setGate();
 }
@@ -277,7 +295,7 @@ int SnakeGame::checkGame() {
 	if (map[head.getY()][head.getX()] == '@' || map[head.getY()][head.getX()] == L'?') {
 		this->updateGame();
 		this->gameStart = 0;
-		// this->menu = 1;
+		this->menu = 1;
 		return 1;
 	}
 	return 0;
@@ -314,6 +332,7 @@ void SnakeGame::initGame() {
 
 void SnakeGame::getKeyInMenu() {
 	int ch = getch();
+	WINDOW *score_win;
 	switch (ch) {
 		case (KEY_UP):
 			
@@ -347,6 +366,7 @@ void SnakeGame::getKeyInMenu() {
 }
 
 void SnakeGame::drawMenu(WINDOW *win) {
+	// wclear(win);
 	init_pair(2,COLOR_RED,COLOR_BLUE);
 	attron(COLOR_PAIR(2));
 	wbkgd(win,COLOR_PAIR(2));
@@ -354,34 +374,36 @@ void SnakeGame::drawMenu(WINDOW *win) {
 	box(win, 0, 0);
 	int maxSubX, maxSubY;
 	getmaxyx(win, maxSubY, maxSubX);
-	mvwprintw(win, 0, (maxSubX - strlen("subWin")) / 2, "subWin");
-	mvwprintw(win, 1, 1, "press Q, A, D, Z");
+	mvwprintw(win, 0, (maxSubX - strlen("Menu")) / 2, "Menu");
+	mvwprintw(win, 1, 1, "Press Z.  Latest Score:%d       ", score);
 
 	if (this->getMenu() == 1) {
 		wattron(win, A_STANDOUT);
 		mvwprintw(win, maxSubY / 2, 5, "Start");
 		wattroff(win, A_STANDOUT);
-		mvwprintw(win, maxSubY / 2, 15, "Score");
-		mvwprintw(win, maxSubY / 2, 25, "Option");
+		// mvwprintw(win, maxSubY / 2, 15, "Score");
+		// mvwprintw(win, maxSubY / 2, 25, "Option");
 		mvwprintw(win, maxSubY / 2, 35, "Out\r");
-	} else if (this->getMenu() == 2) {
+	}
+	// else if (this->getMenu() == 2) {
+	// 	mvwprintw(win, maxSubY / 2, 5, "Start");
+	// 	wattron(win, A_STANDOUT);
+	// 	mvwprintw(win, maxSubY / 2, 15, "Score");
+	// 	wattroff(win, A_STANDOUT);
+	// 	mvwprintw(win, maxSubY / 2, 25, "Option");
+	// 	mvwprintw(win, maxSubY / 2, 35, "Out\r");
+	// } else if (this->getMenu() == 3) {
+	// 	mvwprintw(win, maxSubY / 2, 5, "Start");
+	// 	mvwprintw(win, maxSubY / 2, 15, "Score");
+	// 	wattron(win, A_STANDOUT);
+	// 	mvwprintw(win, maxSubY / 2, 25, "Option");
+	// 	wattroff(win, A_STANDOUT);
+	// 	mvwprintw(win, maxSubY / 2, 35, "Out\r");
+	// }
+	else if (this->getMenu() == 4) {
 		mvwprintw(win, maxSubY / 2, 5, "Start");
-		wattron(win, A_STANDOUT);
-		mvwprintw(win, maxSubY / 2, 15, "Score");
-		wattroff(win, A_STANDOUT);
-		mvwprintw(win, maxSubY / 2, 25, "Option");
-		mvwprintw(win, maxSubY / 2, 35, "Out\r");
-	} else if (this->getMenu() == 3) {
-		mvwprintw(win, maxSubY / 2, 5, "Start");
-		mvwprintw(win, maxSubY / 2, 15, "Score");
-		wattron(win, A_STANDOUT);
-		mvwprintw(win, maxSubY / 2, 25, "Option");
-		wattroff(win, A_STANDOUT);
-		mvwprintw(win, maxSubY / 2, 35, "Out\r");
-	} else if (this->getMenu() == 4) {
-		mvwprintw(win, maxSubY / 2, 5, "Start");
-		mvwprintw(win, maxSubY / 2, 15, "Score");
-		mvwprintw(win, maxSubY / 2, 25, "Option");
+		// mvwprintw(win, maxSubY / 2, 15, "Score");
+		// mvwprintw(win, maxSubY / 2, 25, "Option");
 		wattron(win, A_STANDOUT);
 		mvwprintw(win, maxSubY / 2, 35, "Out\r");
 		wattroff(win, A_STANDOUT);

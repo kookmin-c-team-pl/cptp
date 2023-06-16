@@ -11,17 +11,17 @@ int main() {
 	keypad(stdscr, TRUE);
 	start_color();
 	box(stdscr, 0, 0);
-	printw("mainWin");
+	// printw("mainWin");
 
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 
-	WINDOW *win = subwin(stdscr, 5, 50, 5, 10);
+	game.win = subwin(stdscr, 10, 45, 5, 20);
 	// refresh();
 
 	while (game.getRun()) {
 		if (game.getMenu() > 0) {
-			game.drawMenu(win);
+			game.drawMenu(game.win);
 			continue;
 		} else if (game.getGameStart())
 		{
@@ -50,6 +50,7 @@ int main() {
 			game.drawGame(stdscr);
 			if (game.checkGame()) {
 				wclear(stdscr);
+				continue;
 			}
 			getch(); // clear buffer
 			usleep(500000); // <-

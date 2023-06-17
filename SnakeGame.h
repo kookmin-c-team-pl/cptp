@@ -204,6 +204,7 @@ void SnakeGame::updateGame() {
 	this->setGate();
 	this->setItem();
 	isThroughGate--;
+	frame++;
 }
 
 void SnakeGame::midGate(int g_x, int g_y) {
@@ -384,7 +385,7 @@ void SnakeGame::drawGame(WINDOW *win) {
 	}
 	std::vector<Position> body = player.getBody();
 	// mvwprintw(win, 0, 15, "x:%d, y:%d", head.getX(), head.getY());
-	mvwprintw(win, 0, MAPSIZEW + 1, "**SCORE BOARD**");
+	mvwprintw(win, 0, MAPSIZEW + 1, " *** SCORE BOARD *** ");
 	mvwprintw(win, 2, MAPSIZEW + 2, "time: %d, score: %s", frame / 2, std::to_string(score).c_str());
 	if (body.size() >= SCOREB)
 		mvwprintw(win, 4, MAPSIZEW + 2, "B: %d / %d (v)", body.size(), SCOREB);
@@ -429,6 +430,7 @@ void SnakeGame::initGame() {
 		delete item;
 		item = nullptr;
 	}
+	frame = 0;
 }
 
 void SnakeGame::getKeyInMenu() {

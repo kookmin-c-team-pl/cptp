@@ -1,2 +1,2 @@
 all:
-	g++ main.cpp -lncurses
+	g++ -o snakeGame main.cpp -lncurses

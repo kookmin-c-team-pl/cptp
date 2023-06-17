@@ -10,7 +10,7 @@
 #define MAPSIZEW 21 * 2
 #define SCOREB 7
 #define SCOREP 5
-#define SCOREM 5
+#define SCOREM 2
 #define SCOREG 5
 #define MENU 4
 
@@ -109,30 +109,18 @@ void SnakeGame::setItem() {
 			item = nullptr;
 			isitem = 0;
 		}
-		// srand(static_cast<unsigned>(time(nullptr)));
 		int x = rand() % MAPSIZEW;
 		int y = rand() % MAPSIZEH;
 		if (x % 2 == 1) {
 			x++;
 		}
 		int type = rand() % 2 == 1 ? '+' : '-';
-		// while (map[y][x] != ' ') {
-		// 	x = rand() % MAPSIZEW;
-		// 	y = rand() % MAPSIZEH;
-		// 	if (x % 2 == 1) {
-		// 		x++;
-		// 	}
-		// 	type = rand() % 2 + '0';
-		// }
 		if (map[y][x] == ' ') {
 			item = new Item(x, y, type);
 			map[y][x] = type;
 			isitem = 1;
 		}
 		lastGateTime = currentTime;
-	}
-	if (item != nullptr) {
-		// map[item->getPosition().getY()][item->getPosition().getX()] = item->getType() + '0';
 	}
 }
 

@@ -19,7 +19,7 @@
 
 class SnakeGame {
 public:
-	SnakeGame() : run(1), menu(1), gameStart(1), headX(MAPSIZEW / 2), headY(MAPSIZEH / 2), dir(1), dirGate(0), score(0), scoreP(0), scoreM(0), scoreG(0), player(headX, headY), gates(0), item(nullptr), isitem(0) {
+	SnakeGame() : run(1), menu(1), gameStart(1), dir(1), dirGate(0), score(0), scoreP(0), scoreM(0), scoreG(0), gates(0), item(nullptr), isitem(0), headX((MAPSIZEW / 2) % 2 == 1 ? MAPSIZEW / 2 : MAPSIZEW / 2 + 1), headY(MAPSIZEH / 2), player(headX, headY) {
 		for (int h=0; h<MAPSIZEH; h++) {
 			for (int w=0; w<MAPSIZEW; w++) {
 				map[h][w] = ' ';
@@ -192,7 +192,10 @@ void SnakeGame::updateGame() {
 	for (int i=1; i<MAPSIZEW / 3; i++) { // wall
 		if (gates > 1)
 			break;
-		map[i][MAPSIZEW / 3] = '?';
+		if ((MAPSIZEW / 3) % 2 == 1)
+			map[i][MAPSIZEW / 3 + 1] = '?';
+		else
+			map[i][MAPSIZEW / 3] = '?';
 	}
 	for (int i=1; i<MAPSIZEH / 3; i++) { // wall
 		if (gates > 1)
@@ -404,7 +407,7 @@ void SnakeGame::initGame() {
 	run = (1);
 	menu = (0);
 	gameStart = (1);
-	headX = (MAPSIZEW / 2);
+	headX = ((MAPSIZEW / 2) % 2 == 1 ? MAPSIZEW / 2 + 1 : MAPSIZEW / 2);
 	headY = (MAPSIZEH / 2);
 	dir = (1);
 	dirGate = (0);

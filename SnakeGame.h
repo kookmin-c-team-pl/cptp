@@ -1,13 +1,10 @@
 #ifndef SNAKEGAME_H
 #define SNAKEGAME_H
 #include "ncurses.h"
-#include <iostream>
 #include "Snake.h"
 #include <time.h>
-#include <cstring>
 #include <random>
 #include "Item.h"
-#include <fcntl.h>
 
 #define MAPSIZEH 21
 #define MAPSIZEW 21 * 2
@@ -19,7 +16,7 @@
 
 class SnakeGame {
 public:
-	SnakeGame() : run(1), menu(1), gameStart(1), dir(1), dirGate(0), score(0), scoreP(0), scoreM(0), scoreG(0), gates(0), item(nullptr), isitem(0), headX((MAPSIZEW / 2) % 2 == 1 ? MAPSIZEW / 2 : MAPSIZEW / 2 + 1), headY(MAPSIZEH / 2), player(headX, headY) {
+	SnakeGame() : run(1), menu(1), gameStart(1), dir(1), dirGate(0), score(0), scoreP(0), scoreM(0), scoreG(0), gates(0), isThroughGate(0), item(nullptr), isitem(0), headX((MAPSIZEW / 2) % 2 == 1 ? MAPSIZEW / 2 : MAPSIZEW / 2 + 1), headY(MAPSIZEH / 2), player(headX, headY), frame(0) {
 		for (int h=0; h<MAPSIZEH; h++) {
 			for (int w=0; w<MAPSIZEW; w++) {
 				map[h][w] = ' ';
@@ -93,8 +90,10 @@ private:
 	int scoreG;
 	Snake player;
 	int gates;
+	int isThroughGate;
 	Item *item;
 	int isitem;
+	int frame;
 
 	int map[MAPSIZEH][MAPSIZEW];
 };
@@ -110,7 +109,7 @@ void SnakeGame::setItem() {
 			item = nullptr;
 			isitem = 0;
 		}
-		srand(static_cast<unsigned>(time(nullptr)));
+		// srand(static_cast<unsigned>(time(nullptr)));
 		int x = rand() % MAPSIZEW;
 		int y = rand() % MAPSIZEH;
 		if (x % 2 == 1) {
@@ -141,7 +140,7 @@ void SnakeGame::setGate() {
 	static time_t lastGateTime = time(nullptr);
     time_t currentTime = time(nullptr);
 
-    if (currentTime - lastGateTime >= 5) {
+    if (currentTime - lastGateTime >= 5 && isThroughGate < 1) {
         srand(static_cast<unsigned>(time(nullptr)));
 
         gates = 0; // 게이트 생성 전에 gates 변수를 초기화합니다.
@@ -204,6 +203,7 @@ void SnakeGame::updateGame() {
 	}
 	this->setGate();
 	this->setItem();
+	isThroughGate--;
 }
 
 void SnakeGame::midGate(int g_x, int g_y) {
@@ -302,6 +302,7 @@ void SnakeGame::checkGate() {
 			midGate(g_x, g_y);
 		}
 		scoreG++;
+		isThroughGate = player.getBody().size();
 	} else if (map[head.getY()][head.getX()] == 'B') { // B
 		for (int i=0; i<MAPSIZEH; i++) { // find A
 			for (int j=0; j<MAPSIZEW; j++) {
@@ -327,6 +328,7 @@ void SnakeGame::checkGate() {
 			midGate(g_x, g_y);
 		}
 		scoreG++;
+		isThroughGate = player.getBody().size();
 	}
 }
 
@@ -383,7 +385,7 @@ void SnakeGame::drawGame(WINDOW *win) {
 	std::vector<Position> body = player.getBody();
 	// mvwprintw(win, 0, 15, "x:%d, y:%d", head.getX(), head.getY());
 	mvwprintw(win, 0, MAPSIZEW + 1, "**SCORE BOARD**");
-	mvwprintw(win, 2, MAPSIZEW + 2, std::to_string(score).c_str());
+	mvwprintw(win, 2, MAPSIZEW + 2, "time: %d, score: %s", frame / 2, std::to_string(score).c_str());
 	if (body.size() >= SCOREB)
 		mvwprintw(win, 4, MAPSIZEW + 2, "B: %d / %d (v)", body.size(), SCOREB);
 	else
@@ -404,6 +406,11 @@ void SnakeGame::drawGame(WINDOW *win) {
 }
 
 void SnakeGame::initGame() {
+	for (int i=0; i<MAPSIZEH; i++) {
+		for (int j=0; j<MAPSIZEW; j++) {
+			map[i][j] = ' ';
+		}
+	}
 	run = (1);
 	menu = (0);
 	gameStart = (1);
@@ -417,6 +424,11 @@ void SnakeGame::initGame() {
 	scoreG = 0;
 	player = Snake(headX, headY);
 	gates = (0);
+	if (item != nullptr) {
+		isitem = 0;
+		delete item;
+		item = nullptr;
+	}
 }
 
 void SnakeGame::getKeyInMenu() {

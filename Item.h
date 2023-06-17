@@ -1,7 +1,6 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-#include <iostream>
 #include "Position.h"
 #include "ncurses.h"
 

@@ -6,14 +6,20 @@
 #include <time.h>
 #include <cstring>
 #include <random>
+#include "Item.h"
+#include <fcntl.h>
 
-#define MAPSIZEW 18 * 2
-#define MAPSIZEH 18
+#define MAPSIZEH 21
+#define MAPSIZEW 21 * 2
+#define SCOREB 7
+#define SCOREP 5
+#define SCOREM 5
+#define SCOREG 5
 #define MENU 4
 
 class SnakeGame {
 public:
-	SnakeGame() : run(1), menu(1), gameStart(1), headX(MAPSIZEW / 2), headY(MAPSIZEH / 2), dir(1), dirGate(0), score(0), player(headX, headY), gates(0) {
+	SnakeGame() : run(1), menu(1), gameStart(1), headX(MAPSIZEW / 2), headY(MAPSIZEH / 2), dir(1), dirGate(0), score(0), scoreP(0), scoreM(0), scoreG(0), player(headX, headY), gates(0), item(nullptr), isitem(0) {
 		for (int h=0; h<MAPSIZEH; h++) {
 			for (int w=0; w<MAPSIZEW; w++) {
 				map[h][w] = ' ';
@@ -58,15 +64,17 @@ public:
 	}
 
 	void updateGame();
-	void updateBody();
+	void updateBodyMap();
 	void drawGame(WINDOW *win);
 	int checkGame();
-	void midGate(int x, int y);
 	void checkGate();
+	void checkItem();
+	void midGate(int x, int y);
 	void initGame();
 
 	void getKeyInMenu();
 	void drawMenu(WINDOW *win);
+	void setItem();
 	void setGate();
 
 	WINDOW *win;
@@ -80,11 +88,54 @@ private:
 	int dir;
 	int dirGate;
 	int score;
+	int scoreP;
+	int scoreM;
+	int scoreG;
 	Snake player;
 	int gates;
+	Item *item;
+	int isitem;
 
 	int map[MAPSIZEH][MAPSIZEW];
 };
+
+void SnakeGame::setItem() {
+	static time_t lastGateTime = time(nullptr);
+    time_t currentTime = time(nullptr);
+
+    if (currentTime - lastGateTime >= 10 || isitem == 0) {
+		if (item != nullptr) {
+			map[item->getPosition().getY()][item->getPosition().getX()] = ' '; // remove item
+			delete item;
+			item = nullptr;
+			isitem = 0;
+		}
+		srand(static_cast<unsigned>(time(nullptr)));
+		int x = rand() % MAPSIZEW;
+		int y = rand() % MAPSIZEH;
+		if (x % 2 == 1) {
+			x++;
+		}
+		int type = rand() % 2 == 1 ? '+' : '-';
+		// while (map[y][x] != ' ') {
+		// 	x = rand() % MAPSIZEW;
+		// 	y = rand() % MAPSIZEH;
+		// 	if (x % 2 == 1) {
+		// 		x++;
+		// 	}
+		// 	type = rand() % 2 + '0';
+		// }
+		if (map[y][x] == ' ') {
+			item = new Item(x, y, type);
+			map[y][x] = type;
+			isitem = 1;
+		}
+		lastGateTime = currentTime;
+	}
+	if (item != nullptr) {
+		// map[item->getPosition().getY()][item->getPosition().getX()] = item->getType() + '0';
+	}
+}
 
 void SnakeGame::setGate() {
 	static time_t lastGateTime = time(nullptr);
@@ -98,7 +149,7 @@ void SnakeGame::setGate() {
         // 게이트 삭제 로직 추가
         for (int i = 0; i < MAPSIZEH; i++) {
             for (int j = 0; j < MAPSIZEW * 2; j++) {
-                if (map[i][j] >= 'A' && map[i][j] <= 'Z') {
+                if (map[i][j] >= 'A' && map[i][j] <= 'B') {
                     map[i][j] = '?';
                 }
             }
@@ -121,17 +172,16 @@ void SnakeGame::setGate() {
 }
 
 void SnakeGame::updateGame() {
-
-	player.moveBody(dir, 0); // update
+	player.moveBody(dir); // update
 
 	for (int h=0; h < MAPSIZEH; h++) { // 사각형 틀
 		for (int w=0; w < MAPSIZEW; w++) {
 			if (h == 0 || w == 0 || h + 1 == MAPSIZEH || w + 1 == MAPSIZEW) {
 				if (map[h][w] != 'A' && map[h][w] != 'B')
-					map[h][w] = L'@';
+					map[h][w] = L'?';
 			} else {
-				if (map[h][w] != 'A' && map[h][w] != 'B' && map[h][w] != '?')
-				map[h][w] = ' ';
+				if (map[h][w] == '*' || map[h][w] == 'O') // remove body
+					map[h][w] = ' ';
 			}
 			map[0][0] = '@';
 			map[0][MAPSIZEW - 1] = '@';
@@ -150,22 +200,23 @@ void SnakeGame::updateGame() {
 		map[MAPSIZEH / 3][i] = '?';
 	}
 	this->setGate();
+	this->setItem();
 }
 
 void SnakeGame::midGate(int g_x, int g_y) {
 	switch (dir)
 	{
 	case 1:
-		if (map[g_y - 1][g_x] == ' ') {
+		if (map[g_y - 1][g_x] != '?' && map[g_y - 1][g_x] != '@') {
 			player.headGate(g_x, g_y, 1);
 			dir = 1;
-		} else if (map[g_y][g_x + 2] == ' ') {
+		} else if (map[g_y][g_x + 2] != '?' && map[g_y][g_x + 2] != '@') {
 			player.headGate(g_x, g_y, 2);
 			dir = 2;
-		} else if (map[g_y + 1][g_x] == ' ') {
+		} else if (map[g_y + 1][g_x] != '?' && map[g_y + 1][g_x] != '@') {
 			player.headGate(g_x, g_y, 3);
 			dir = 3;
-		} else if (map[g_y][g_x - 2] == ' ') {
+		} else if (map[g_y][g_x - 2] != '?' && map[g_y + 1][g_x] != '@') {
 			player.headGate(g_x, g_y, 4);
 			dir = 4;
 		}
@@ -247,6 +298,7 @@ void SnakeGame::checkGate() {
 		} else {
 			midGate(g_x, g_y);
 		}
+		scoreG++;
 	} else if (map[head.getY()][head.getX()] == 'B') { // B
 		for (int i=0; i<MAPSIZEH; i++) { // find A
 			for (int j=0; j<MAPSIZEW; j++) {
@@ -271,16 +323,17 @@ void SnakeGame::checkGate() {
 		} else {
 			midGate(g_x, g_y);
 		}
+		scoreG++;
 	}
 }
 
-void SnakeGame::updateBody() {
+void SnakeGame::updateBodyMap() {
 	std::vector<Position> body = player.getBody(); // update body
 	std::vector<Position>::iterator it;
 	for (it = body.begin(); it != body.end(); it++) {
 		int x = it->getX();
 		int y = it->getY();
-		if (map[y][x] == ' ') {
+		if (checkGame() == 0) {
 			if (it == body.begin()) {
 				map[y][x] = L'O';
 			} else {
@@ -292,13 +345,26 @@ void SnakeGame::updateBody() {
 
 int SnakeGame::checkGame() {
 	Position head = player.getBody().front();
-	if (map[head.getY()][head.getX()] == '@' || map[head.getY()][head.getX()] == L'?') {
-		this->updateGame();
-		this->gameStart = 0;
-		this->menu = 1;
+	if (map[head.getY()][head.getX()] == '@' || map[head.getY()][head.getX()] == '?' || map[head.getY()][head.getX()] == '*') {
+		// this->updateGame();
+		return 1;
+	} else if (player.getBody().size() < 3) {
 		return 1;
 	}
 	return 0;
+}
+
+void SnakeGame::checkItem() {
+	Position head = player.getBody().front();
+	int check = map[head.getY()][head.getX()];
+	if (check == '-' || check == '+') { // item
+		isitem = 0;
+		if (check == '+')
+			scoreP++;
+		else if (check == '-')
+			scoreM++;
+	}
+	player.removeTail(check);
 }
 
 void SnakeGame::drawGame(WINDOW *win) {
@@ -308,12 +374,29 @@ void SnakeGame::drawGame(WINDOW *win) {
 		for (int w=0; w < MAPSIZEW; w++) {
 			// wprintw(win, " ");
 			int c = map[h][w];
-			mvwprintw(win, h + 1, w, "%c", c);
+			mvwprintw(win, h, w, "%c", c);
 		}
 	}
-	mvwprintw(win, 0, 3, std::to_string(score).c_str());
-	Position head = player.getBody().front();
-	mvwprintw(win, 0, 15, "x:%d, y:%d", head.getX(), head.getY());
+	std::vector<Position> body = player.getBody();
+	// mvwprintw(win, 0, 15, "x:%d, y:%d", head.getX(), head.getY());
+	mvwprintw(win, 0, MAPSIZEW + 1, "**SCORE BOARD**");
+	mvwprintw(win, 2, MAPSIZEW + 2, std::to_string(score).c_str());
+	if (body.size() >= SCOREB)
+		mvwprintw(win, 4, MAPSIZEW + 2, "B: %d / %d (v)", body.size(), SCOREB);
+	else
+		mvwprintw(win, 4, MAPSIZEW + 2, "B: %d / %d ( )", body.size(), SCOREB);
+	if (scoreP >= SCOREP)
+		mvwprintw(win, 6, MAPSIZEW + 2, "P: %d / %d (v)", scoreP, SCOREP);
+	else
+		mvwprintw(win, 6, MAPSIZEW + 2, "P: %d / %d ( )", scoreP, SCOREP);
+	if (scoreM >= SCOREM)
+		mvwprintw(win, 8, MAPSIZEW + 2, "M: %d / %d (v)", scoreM, SCOREM);
+	else
+		mvwprintw(win, 8, MAPSIZEW + 2, "M: %d / %d ( )", scoreM, SCOREM);
+	if (scoreG >= SCOREG)
+		mvwprintw(win, 10, MAPSIZEW + 2, "G: %d / %d (v)", scoreG, SCOREG);
+	else
+		mvwprintw(win, 10, MAPSIZEW + 2, "G: %d / %d ( )", scoreG, SCOREG);
 	// wrefresh(win);
 }
 
@@ -326,6 +409,9 @@ void SnakeGame::initGame() {
 	dir = (1);
 	dirGate = (0);
 	score = (0);
+	scoreP = 0;
+	scoreM = 0;
+	scoreG = 0;
 	player = Snake(headX, headY);
 	gates = (0);
 }
@@ -379,33 +465,18 @@ void SnakeGame::drawMenu(WINDOW *win) {
 
 	if (this->getMenu() == 1) {
 		wattron(win, A_STANDOUT);
-		mvwprintw(win, maxSubY / 2, 5, "Start");
+		mvwprintw(win, maxSubY / 2, 10, "Start");
 		wattroff(win, A_STANDOUT);
 		// mvwprintw(win, maxSubY / 2, 15, "Score");
 		// mvwprintw(win, maxSubY / 2, 25, "Option");
-		mvwprintw(win, maxSubY / 2, 35, "Out\r");
+		mvwprintw(win, maxSubY / 2, 30, "Out");
 	}
-	// else if (this->getMenu() == 2) {
-	// 	mvwprintw(win, maxSubY / 2, 5, "Start");
-	// 	wattron(win, A_STANDOUT);
-	// 	mvwprintw(win, maxSubY / 2, 15, "Score");
-	// 	wattroff(win, A_STANDOUT);
-	// 	mvwprintw(win, maxSubY / 2, 25, "Option");
-	// 	mvwprintw(win, maxSubY / 2, 35, "Out\r");
-	// } else if (this->getMenu() == 3) {
-	// 	mvwprintw(win, maxSubY / 2, 5, "Start");
-	// 	mvwprintw(win, maxSubY / 2, 15, "Score");
-	// 	wattron(win, A_STANDOUT);
-	// 	mvwprintw(win, maxSubY / 2, 25, "Option");
-	// 	wattroff(win, A_STANDOUT);
-	// 	mvwprintw(win, maxSubY / 2, 35, "Out\r");
-	// }
 	else if (this->getMenu() == 4) {
-		mvwprintw(win, maxSubY / 2, 5, "Start");
+		mvwprintw(win, maxSubY / 2, 10, "Start");
 		// mvwprintw(win, maxSubY / 2, 15, "Score");
 		// mvwprintw(win, maxSubY / 2, 25, "Option");
 		wattron(win, A_STANDOUT);
-		mvwprintw(win, maxSubY / 2, 35, "Out\r");
+		mvwprintw(win, maxSubY / 2, 30, "Out");
 		wattroff(win, A_STANDOUT);
 	}
 	wrefresh(win);

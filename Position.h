@@ -21,10 +21,10 @@ public:
 	Position getRightPosition() {
 		return (Position(x + 1, y));
 	}
-	int getX() {
+	int getX() const {
 		return x;
 	}
-	int getY() {
+	int getY() const {
 		return y;
 	}
 	void setX(int _x) {

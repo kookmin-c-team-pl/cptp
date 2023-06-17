@@ -15,7 +15,7 @@ public:
 	const std::vector<Position> &getBody() {
 		return body;
 	}
-	void moveBody(int dir, int item = 0) {
+	void moveBody(int dir) {
 		// head insert
 		if (dir == 1) { // up
 			body.insert(body.begin(), Position(head.getX(), head.getY() - 1));
@@ -27,19 +27,23 @@ public:
 			body.insert(body.begin(), Position(head.getX() - 2, head.getY()));
 		}
 		head = body.front();
+	}
+	void removeTail(int i) {
 		// tail remove
-		switch (item)
+		switch (i)
 		{
 		case 0:
-			body.pop_back(); // remove tail
+			body.pop_back(); // remove tail (normal)
 			break;
-		case 1:
+		case '+':
 			break; // body + 1
-		case 2:
+		case '-':
 			body.pop_back();
 			body.pop_back(); // body - 1
+			break;
 		
 		default:
+			body.pop_back(); // remove tail (normal)
 			break;
 		}
 	}

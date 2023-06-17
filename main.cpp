@@ -5,8 +5,6 @@
 int main() {
 	SnakeGame game;
 	initscr();
-	cbreak();
-	noecho();
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
 	start_color();
@@ -46,13 +44,17 @@ int main() {
 			}
 			game.updateGame();
 			game.checkGate();
-			game.updateBody();
+			game.checkItem();
+			game.updateBodyMap();
 			game.drawGame(stdscr);
 			if (game.checkGame()) {
+				game.setGameStart(0);
+				game.reduceMenu();
 				wclear(stdscr);
 				continue;
 			}
 			getch(); // clear buffer
+			flushinp(); // clear buffer stack
 			usleep(500000); // <-
 			game.earnScore();
 		}
